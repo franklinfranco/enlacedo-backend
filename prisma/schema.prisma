@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model noticias {
+  id_noticia       Int      @id @default(autoincrement())
+  titulo           String   @db.VarChar(255)
+  subtitulo        String?  @db.Text
+  contenido        String   @db.Text
+  fecha_publicacion DateTime @default(now())
+  fecha_actualizacion DateTime?
+  id_seccion       Int
+  id_autor         Int?
+  fuente_original  String?  @db.VarChar(255)
+  url_fuente       String?  @db.VarChar(255)
+  palabras_clave   String?  @db.Text
+  es_destacada     Boolean  @default(false)
+  estado           String   @default("publicado") @db.VarChar(50)
+  seccion          secciones @relation(fields: [id_seccion], references: [id_seccion])
+  autor            autores?  @relation(fields: [id_autor], references: [id_autor])
+  noticias_etiquetas noticias_etiquetas[]
+  imagenes         noticias_imagenes[]
+}
+
+model secciones {
+  id_seccion          Int       @id @default(autoincrement())
+  nombre_seccion      String    @unique @db.VarChar(100)
+  descripcion_seccion String?   @db.Text
+  slug_seccion        String    @unique @db.VarChar(100)
+  noticias            noticias[]
+}
+
+model autores {
+  id_autor       Int        @id @default(autoincrement())
+  nombre_autor   String     @db.VarChar(150)
+  biografia_autor String?    @db.Text
+  email_autor    String?    @unique @db.VarChar(100)
+  twitter_autor  String?    @db.VarChar(100)
+  noticias       noticias[]
+}
+
+model etiquetas {
+  id_etiqueta      Int                 @id @default(autoincrement())
+  nombre_etiqueta  String              @unique @db.VarChar(100)
+  slug_etiqueta    String              @unique @db.VarChar(100)
+  noticias_etiquetas noticias_etiquetas[]
+}
+
+model noticias_etiquetas {
+  id_noticia   Int
+  id_etiqueta  Int
+  noticia      noticias  @relation(fields: [id_noticia], references: [id_noticia], onDelete: Cascade)
+  etiqueta     etiquetas @relation(fields: [id_etiqueta], references: [id_etiqueta], onDelete: Cascade)
+  @@id([id_noticia, id_etiqueta])
+}
+
+model imagenes {
+  id_imagen        Int                  @id @default(autoincrement())
+  nombre_archivo   String               @db.VarChar(255)
+  ruta_archivo     String               @db.VarChar(255)
+  alt_texto        String?              @db.VarChar(255)
+  fecha_subida     DateTime             @default(now())
+  noticias         noticias_imagenes[]
+}
+
+model noticias_imagenes {
+  id_noticia    Int
+  id_imagen     Int
+  noticia       noticias @relation(fields: [id_noticia], references: [id_noticia], onDelete: Cascade)
+  imagen        imagenes @relation(fields: [id_imagen], references: [id_imagen], onDelete: Cascade)
+  es_principal  Boolean  @default(false)
+  descripcion_imagen String? @db.Text
+  @@id([id_noticia, id_imagen])
+}
+
+model espacios_publicitarios {
+  id_espacio             Int       @id @default(autoincrement())
+  nombre_espacio         String    @unique @db.VarChar(100)
+  descripcion_espacio    String?   @db.Text
+  dimensiones_recomendadas String?   @db.VarChar(50)
+  precio                 Decimal?  @db.Decimal(10, 2)
+  estado                 String    @default("activo") @db.VarChar(50)
+  anuncios               anuncios[]
+}
+
+model anuncios {
+  id_anuncio   Int      @id @default(autoincrement())
+  id_espacio   Int
+  nombre_anunciante String? @db.VarChar(150)
+  imagen_anuncio  String? @db.VarChar(255)
+  url_anuncio    String? @db.VarChar(255)
+  fecha_inicio   DateTime? @db.Date
+  fecha_fin      DateTime? @db.Date
+  estado         String   @default("activo") @db.VarChar(50)
+  espacio        espacios_publicitarios @relation(fields: [id_espacio], references: [id_espacio])
+}
