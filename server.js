@@ -21,24 +21,26 @@ const pool = new Pool({
 
 // --- 2. CONFIGURACIÓN DE CORS (AJUSTADO A TU URL DE VERCEL) ---
 const allowedOrigins = [
-    'https://enlacedo-frontend.vercel.app', // <--- TU DOMINIO DE FRONTEND
-    'http://localhost:3000', 
+    'https://enlacedo-frontend.vercel.app', // URL de Vercel
+    'https://enlacedo.com',                  // Dominio raíz (Namecheap)
+    'https://www.enlacedo.com',              // Dominio con www (Namecheap)
+    'http://localhost:3000',
     'http://localhost:3001'
 ];
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Permitir peticiones sin origen (ej. Postman)
+        // Permitir peticiones sin origen (como Postman o peticiones del mismo servidor)
         if (!origin) return callback(null, true); 
-        
-        // Si el origen está en nuestra lista de permitidos, aceptar
+        // Verificar si el origen está en la lista blanca
         if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = `La política CORS para este sitio no permite el acceso desde el origen ${origin}.`;
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(msg), false);
         }
         return callback(null, true);
-    }
-})); 
+    },
+    credentials: true 
+}));
 // -----------------------------------------------------------------
 
 app.use(express.json());
