@@ -740,8 +740,8 @@ app.post('/noticias', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'INSERT INTO noticias (titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url_fuente, palabras_clave, es_destacada, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url_fuente, palabras_clave, es_destacada, estado]
+      'INSERT INTO noticias (titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url, palabras_clave, es_destacada, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+      [titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url, palabras_clave, es_destacada, estado]
     );
     res.status(201).json(result.rows[0]); // Respondemos con la noticia creada
   } catch (err) {
