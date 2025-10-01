@@ -736,18 +736,59 @@ app.delete('/noticias/:id', async (req, res) => {
 });
 
 app.post('/noticias', async (req, res) => {
-  const { titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url_fuente, palabras_clave, es_destacada, estado } = req.body;
+    // 1. Desestructuración corregida (¡Asegúrate de que 'url' y 'principal' estén aquí!)
+    const { 
+        titulo, 
+        subtitulo, 
+        contenido, 
+        id_seccion, 
+        id_autor, 
+        fuente_original, 
+        url_fuente, 
+        palabras_clave, 
+        es_destacada, 
+        estado,
+        
+        // <-- ¡CAMPOS FALTANTES AGREGADOS!
+        url, 
+        principal, 
+        fecha_publicacion, 
+        fecha_actualizacion 
+    } = req.body;
 
-  try {
-    const result = await pool.query(
-      'INSERT INTO noticias (titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url_fuente, palabras_clave, es_destacada, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, url_fuente, palabras_clave, es_destacada, estado]
-    );
-    res.status(201).json(result.rows[0]); // Respondemos con la noticia creada
-  } catch (err) {
-    console.error('Error al crear la noticia', err);
-    res.status(500).send('Error al crear la noticia');
-  }
+    // Usaremos un array de valores con 14 elementos
+    const values = [
+        titulo, subtitulo, contenido, id_seccion, id_autor, fuente_original, 
+        url_fuente, palabras_clave, es_destacada, estado, 
+        
+        // <-- ¡VALORES AGREGADOS EN ORDEN!
+        url, // $11
+        principal, // $12
+        // Usar la fecha si viene, si no, usa la fecha actual de JS
+        fecha_publicacion || new Date(), // $13
+        fecha_actualizacion || new Date() // $14
+    ];
+
+    try {
+        const result = await pool.query(
+            // 2. Consulta SQL corregida con 14 columnas y 14 valores ($1 a $14)
+            `INSERT INTO noticias (
+                titulo, subtitulo, contenido, id_seccion, id_autor, 
+                fuente_original, url_fuente, palabras_clave, es_destacada, estado, 
+                url, principal, fecha_publicacion, fecha_actualizacion
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
+                $11, $12, $13, $14
+            ) RETURNING *`,
+            values // Usamos el array de 14 valores
+        );
+        
+        res.status(201).json(result.rows[0]); 
+    } catch (err) {
+        console.error('Error al crear la noticia', err);
+        // Devolver un JSON en caso de error para que el frontend lo maneje mejor
+        res.status(500).json({ message: 'Error interno del servidor al crear la noticia.', error: err.message });
+    }
 });
 
 app.listen(port, '0.0.0.0', () => {
