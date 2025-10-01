@@ -23,7 +23,8 @@ const pool = new Pool({
 const allowedOrigins = [
     'https://enlacedo-frontend.vercel.app', // URL de Vercel
     'https://enlacedo.com',                  // Dominio raíz (Namecheap)
-    'https://www.enlacedo.com',              // Dominio con www (Namecheap)
+    'https://www.enlacedo.com',
+    'www.enlacedo.com',              // Dominio con www (Namecheap)
     'http://localhost:3000',
     'http://localhost:3001'
 ];
